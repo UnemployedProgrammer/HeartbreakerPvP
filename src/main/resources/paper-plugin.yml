@@ -1,0 +1,7 @@
+name: HeartbreakerPvP
+version: '1.0-BETA'
+main: com.sebastian.heartbreaker_pvp.HeartbreakerPvP
+api-version: '1.21'
+prefix: HeartBreaker
+authors: [ Sebastian ]
+description: You start with 3 hearts. When you get killed by another player, you loose one heart. Once all of them are gone, you spectate or can`t join anymore.
