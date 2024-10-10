@@ -16,7 +16,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
         logger = getLogger();
         dataFolder = getDataFolder();
         getServer().getPluginManager().registerEvents(new EventListeners(), this);
-        FileReader.Configuration.init_reload();
+        ConfigReader.Configuration.init_reload();
     }
 
     @Override

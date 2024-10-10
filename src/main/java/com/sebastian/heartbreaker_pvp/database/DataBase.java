@@ -8,7 +8,7 @@ public class DataBase {
 
     public static HashMap<String,PlayerDataModel> playerData = new HashMap<>();
 
-    public PlayerDataModel getPlayerData(Player player) {
+    public static PlayerDataModel getPlayerData(Player player) {
        if(!playerData.containsKey(player.getUniqueId().toString())) {
            return new PlayerDataModel();
        }
@@ -16,7 +16,7 @@ public class DataBase {
        return playerData.get(player.getUniqueId().toString());
     }
 
-    public void savePlayerData(Player player, PlayerDataModel data) {
+    public static void savePlayerData(Player player, PlayerDataModel data) {
         if(playerData.containsKey(player.getUniqueId().toString())) {
             playerData.replace(player.getUniqueId().toString(), data);
         } else {
@@ -24,7 +24,8 @@ public class DataBase {
         }
     }
 
-    public void removeEntryAndSaveToFile(Player plr) {
-
+    public static void removeEntryAndSaveToFile(Player plr) {
+        DataFileComunicator.savePlayerFile(plr, getPlayerData(plr));
+        playerData.remove(plr.getUniqueId().toString());
     }
 }
