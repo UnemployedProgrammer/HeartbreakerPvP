@@ -78,7 +78,7 @@ public class ConfigReader {
                 "kick_msg": "",  // Custom kick message, empty means default message: <color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>
 
                 // Custom actionbar text information keys
-                "custom_actionbar_text_information_keys": ["一", "二", "三"]  // Example in Chinese (simplified)
+                "custom_actionbar_text_information_keys": ["一", "二", "三", "无数据", "零"]  // Example in Chinese (simplified)
             }
             """;
 
