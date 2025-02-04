@@ -1,6 +1,7 @@
 package com.sebastian.heartbreaker_pvp;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
+import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
@@ -11,49 +12,49 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class EventListeners implements Listener {
+    public static void triggerDeath(Player player) {
+        PlayerDataModel dataModel = DataBase.getPlayerData(player);
+        dataModel.setHearts(dataModel.getHearts() - 1);
+        DataBase.savePlayerData(player, dataModel);
+        if (dataModel.getHearts() <= 0 &&
+                ConfigReader.Configuration.configuration != null)
+            if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
+                if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
+                    player.kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
+                } else {
+                    player.kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>"));
+                }
+            } else {
+                player.setGameMode(GameMode.SPECTATOR);
+            }
+    }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        PlayerDataModel dataModel = DataBase.getPlayerData(event.getPlayer());
-        dataModel.setHearts(dataModel.getHearts() - 1);
-        if(dataModel.getHearts() == 0) {
-            if(ConfigReader.Configuration.configuration != null) {
-                if(ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
-                    if(ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
-                        event.getPlayer().kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
-                    } else {
-                        event.getPlayer().kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>"));
-                    }
-                } else {
-                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
-                }
-            }
-        }
+        if (event.getDamageSource().getCausingEntity() instanceof Player)
+            triggerDeath(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         DataBase.savePlayerData(event.getPlayer(), DataFileComunicator.readPlayerFile(event.getPlayer()));
-
         PlayerDataModel dataModel = DataBase.getPlayerData(event.getPlayer());
-        dataModel.setHearts(dataModel.getHearts() - 1);
-        if(dataModel.getHearts() == 0) {
-            if(ConfigReader.Configuration.configuration != null) {
-                if(ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
-                    if(ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
-                        event.getPlayer().kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
-                    } else {
-                        event.getPlayer().kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>"));
-                    }
+        if (dataModel.getHearts() <= 0 &&
+                ConfigReader.Configuration.configuration != null)
+            if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
+                if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
+                    event.getPlayer().kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
                 } else {
-                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                    event.getPlayer().kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>"));
                 }
+            } else {
+                event.getPlayer().setGameMode(GameMode.SPECTATOR);
             }
-        }
     }
 
     @EventHandler
@@ -65,7 +66,24 @@ public class EventListeners implements Listener {
     public void onServerTickEnd(ServerTickEndEvent event) {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             PlayerDataModel dataModel = DataBase.getPlayerData(onlinePlayer);
-
+            onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()));
+            if (dataModel.getHearts() <= 0 &&
+                    ConfigReader.Configuration.configuration != null) {
+                if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
+                    if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
+                        onlinePlayer.kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
+                        continue;
+                    }
+                    onlinePlayer.kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>"));
+                    continue;
+                }
+                onlinePlayer.setGameMode(GameMode.SPECTATOR);
+            }
         }
+    }
+
+    @EventHandler
+    public void onInventoryTake(InventoryClickEvent clickEvent) {
+        HeartbreakerPVPCommand.cancelMove(clickEvent);
     }
 }
