@@ -15,7 +15,7 @@ public class PlayerDataModel {
     }
 
     public void setHearts(int hearts) {
-        this.hearts = hearts;
+        this.hearts = Math.clamp(hearts, 0, 3);
     }
 
     @Override

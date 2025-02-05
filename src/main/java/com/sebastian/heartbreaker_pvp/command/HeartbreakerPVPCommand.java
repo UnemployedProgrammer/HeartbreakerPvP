@@ -31,7 +31,7 @@ public class HeartbreakerPVPCommand implements BasicCommand {
         } else if (args[0].equals("reload")) {
             ConfigReader.Configuration.init_reload();
         } else {
-            commandSourceStack.getSender().sendMessage("Usage: /heartbreaker_pvp ui/reload_config");
+            commandSourceStack.getSender().sendMessage("Usage: /heartbreaker_pvp ui/reload");
         }
     }
 
@@ -41,14 +41,22 @@ public class HeartbreakerPVPCommand implements BasicCommand {
     }
 
     public static ItemStack getHead(Player player, boolean bedrock) {
-        int lifePlayer = (int)player.getHealth();
         ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1, (short)3);
         SkullMeta skull = (SkullMeta)item.getItemMeta();
         skull.setDisplayName(player.getName());
         ArrayList<String> lore = new ArrayList<>();
         lore.add("Hearts: " + DataBase.getPlayerData(player).getHearts());
-        lore.add(bedrock ? "Left Click: Add Heart | Shift Click: Remove Heart" : "Left Click: Add Heart | Right Click: Remove Heart");
+        lore.add(bedrock ? "Click to add or remove hearts." : "Left Click: Add Heart | Right Click: Remove Heart");
         skull.setLore(lore);
+        skull.setOwner(player.getName());
+        item.setItemMeta((ItemMeta)skull);
+        return item;
+    }
+
+    public static ItemStack getDisplaynameHead(Player player) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1, (short)3);
+        SkullMeta skull = (SkullMeta)item.getItemMeta();
+        skull.setDisplayName(player.getName() + " | Hearts: " + DataBase.getPlayerData(player).getHearts());
         skull.setOwner(player.getName());
         item.setItemMeta((ItemMeta)skull);
         return item;
@@ -57,9 +65,9 @@ public class HeartbreakerPVPCommand implements BasicCommand {
     public static ItemStack getBedrockUIButton() {
         ItemStack item = new ItemStack(Material.BEDROCK, 1, (short)3);
         ItemMeta skull = item.getItemMeta();
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add("Click to show bedrock compatible UI.");
-        skull.setLore(lore);
+
+        skull.setDisplayName("Click to show bedrock compatible UI.");
+
         item.setItemMeta((ItemMeta)skull);
         return item;
     }
@@ -67,9 +75,9 @@ public class HeartbreakerPVPCommand implements BasicCommand {
     public static ItemStack getJavaUIButton() {
         ItemStack item = new ItemStack(Material.GRASS_BLOCK, 1, (short)3);
         ItemMeta skull = item.getItemMeta();
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add("Click to show best use-able UI for java.");
-        skull.setLore(lore);
+
+        skull.setDisplayName("Click to show best use-able UI for java.");
+
         item.setItemMeta((ItemMeta)skull);
         return item;
     }
@@ -92,45 +100,93 @@ public class HeartbreakerPVPCommand implements BasicCommand {
         plr.openInventory(inv);
     }
 
+    private static ItemStack withName(Material m, String n) {
+        ItemStack item = new ItemStack(m, 1, (short)3);
+        ItemMeta name = item.getItemMeta();
+        name.setDisplayName(n);
+        item.setItemMeta((ItemMeta)name);
+        return item;
+    }
+
+    public static void managePlayer(Player admin, Player target) {
+        Inventory inv = Bukkit.createInventory(null, 27, "Player: " + target.getName());
+        inv.setItem(12, withName(Material.GREEN_CONCRETE, "Add heart"));
+        inv.setItem(13, getDisplaynameHead(target));
+        inv.setItem(14, withName(Material.RED_CONCRETE, "Remove heart"));
+        inv.setItem(22, withName(Material.ARROW, "Back"));
+        admin.openInventory(inv);
+    }
+
     public static void cancelMove(InventoryClickEvent event) {
         InventoryView view = event.getView();
         if (view.getTitle().equals("HeartbreakerPvP: Manage Hearts")) {
-            if(event.getCurrentItem().getType().equals(Material.BEDROCK)) {
-                showBedrockGUI((Player) view.getPlayer());
-                return;
+            try {
+                if(event.getCurrentItem().getType().equals(Material.BEDROCK)) {
+                    showBedrockGUI((Player) view.getPlayer());
+                    return;
+                }
+                if (event.isLeftClick()) {
+                    PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
+                    model.setHearts(model.getHearts() + 1);
+                    DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
+                }
+                if (event.isRightClick()) {
+                    PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
+                    model.setHearts(model.getHearts() - 1);
+                    DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
+                }
+                view.close();
+                showGUI((Player)view.getPlayer());
+                event.setCancelled(true);
+            } catch (Exception ignored) {
             }
-            if (event.isLeftClick()) {
-                PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                model.setHearts(model.getHearts() + 1);
-                DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
-            }
-            if (event.isRightClick()) {
-                PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                model.setHearts(model.getHearts() - 1);
-                DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
-            }
-            view.close();
-            showGUI((Player)view.getPlayer());
-            event.setCancelled(true);
         }
         if (view.getTitle().equals("HeartbreakerPvP: Bedrock UI")) {
             if(event.getCurrentItem().getType().equals(Material.GRASS_BLOCK)) {
                 showGUI((Player) view.getPlayer());
                 return;
             }
-            if (event.isLeftClick()) {
-                PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                model.setHearts(model.getHearts() + 1);
-                DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
-            }
-            if (event.isShiftClick()) {
-                PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                model.setHearts(model.getHearts() - 1);
-                DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
-            }
+
             view.close();
-            showGUI((Player)view.getPlayer());
+
+            try {
+                managePlayer((Player)view.getPlayer(), Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
+            } catch (Exception ignored) {
+            }
+
             event.setCancelled(true);
         }
+
+        if (view.getTitle().contains("Player: ")) {
+            String name = view.getTitle().replace("Player: ", "");
+            try {
+                Player target = Bukkit.getPlayer(name);
+                if(event.getCurrentItem().getType().equals(Material.GREEN_CONCRETE)) {
+                    PlayerDataModel model = DataBase.getPlayerData(target);
+                    model.setHearts(model.getHearts() + 1);
+                    DataBase.savePlayerData(target, model);
+                    event.setCancelled(true);
+                    event.getClickedInventory().setItem(13, getDisplaynameHead(target));
+                    return;
+                }
+                if(event.getCurrentItem().getType().equals(Material.RED_CONCRETE)) {
+                    PlayerDataModel model = DataBase.getPlayerData(target);
+                    model.setHearts(model.getHearts() - 1);
+                    DataBase.savePlayerData(target, model);
+                    event.setCancelled(true);
+                    event.getClickedInventory().setItem(13, getDisplaynameHead(target));
+                    return;
+                }
+                if(event.getCurrentItem().getType().equals(Material.ARROW)) {
+                    view.close();
+                    showBedrockGUI((Player) view.getPlayer());
+                    event.setCancelled(true);
+                    return;
+                }
+            } catch (Exception ignored) {
+            }
+            event.setCancelled(true);
+        }
+
     }
 }
