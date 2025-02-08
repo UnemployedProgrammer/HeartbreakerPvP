@@ -3,34 +3,30 @@ package com.sebastian.heartbreaker_pvp.database;
 import com.google.gson.Gson;
 import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 
-public class PlayerDataModel {
-    private int hearts;
 
-    public PlayerDataModel() {
-        hearts = 3; //Start with three
-    }
+public class PlayerDataModel {
+    private int hearts = 3;
 
     public int getHearts() {
-        return hearts;
+        return this.hearts;
     }
 
     public void setHearts(int hearts) {
-        this.hearts = Math.clamp(hearts, 0, 3);
+        this.hearts = Math.clamp((long)hearts, 0, 3);
     }
 
-    @Override
     public String toString() {
-        return "PlayerData{hearts:" + hearts + "}";
+        return "PlayerData{hearts:" + this.hearts + "}";
     }
 
     public static PlayerDataModel fromJSON(String json) {
         Gson gson = new Gson();
-        PlayerDataModel temp = gson.fromJson(json, PlayerDataModel.class);
+        PlayerDataModel temp = (PlayerDataModel)gson.fromJson(json, PlayerDataModel.class);
         HeartbreakerPvP.logger.info("Loaded PlayerDataModel, data: " + temp.toString());
         return temp;
     }
 
     public String toJson() {
-        return "{\"hearts\":3}";
+        return "{\"hearts\":" + this.hearts + "}";
     }
 }

@@ -4,24 +4,29 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 
-public class DataBase {
+import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
+import java.util.HashMap;
+import org.bukkit.entity.Player;
 
-    public static HashMap<String,PlayerDataModel> playerData = new HashMap<>();
+public class DataBase {
+    public static HashMap<String, PlayerDataModel> playerData = new HashMap();
 
     public static PlayerDataModel getPlayerData(Player player) {
-       if(!playerData.containsKey(player.getUniqueId().toString())) {
-           return new PlayerDataModel();
-       }
-
-       return playerData.get(player.getUniqueId().toString());
+        if (!playerData.containsKey(player.getUniqueId().toString())) {
+            HeartbreakerPvP.logger.warning("No DataModel, returning new PlayerDataModel.");
+            return new PlayerDataModel();
+        } else {
+            return (PlayerDataModel)playerData.get(player.getUniqueId().toString());
+        }
     }
 
     public static void savePlayerData(Player player, PlayerDataModel data) {
-        if(playerData.containsKey(player.getUniqueId().toString())) {
+        if (playerData.containsKey(player.getUniqueId().toString())) {
             playerData.replace(player.getUniqueId().toString(), data);
         } else {
             playerData.put(player.getUniqueId().toString(), data);
         }
+
     }
 
     public static void removeEntryAndSaveToFile(Player plr) {

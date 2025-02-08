@@ -49,10 +49,10 @@ public class ActionBarMessageParser {
                 return three;
             }
             if(num == 2) {
-                return three;
+                return two;
             }
             if(num == 1) {
-                return three;
+                return one;
             }
             if(num == 0) {
                 return zero;

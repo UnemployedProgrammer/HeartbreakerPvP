@@ -108,6 +108,11 @@ public class HeartbreakerPVPCommand implements BasicCommand {
         return item;
     }
 
+    //TODO:
+    //  - Fix Data Load/Save
+    //  - Look out for further bugs
+    //  - Test with bedrock account
+
     public static void managePlayer(Player admin, Player target) {
         Inventory inv = Bukkit.createInventory(null, 27, "Player: " + target.getName());
         inv.setItem(12, withName(Material.GREEN_CONCRETE, "Add heart"));
