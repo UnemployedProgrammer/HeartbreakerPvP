@@ -5,6 +5,7 @@ import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
+import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -21,7 +22,7 @@ import java.util.Iterator;
 public class EventListeners implements Listener {
     public static void triggerDeath(Player player) {
         PlayerDataModel dataModel = DataBase.getPlayerData(player);
-        dataModel.setHearts(dataModel.getHearts() - 1);
+        dataModel.setHearts(dataModel.getHearts() - 1, player);
         DataBase.savePlayerData(player, dataModel);
         if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
             if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
@@ -49,6 +50,7 @@ public class EventListeners implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         DataBase.savePlayerData(event.getPlayer(), DataFileComunicator.readPlayerFile(event.getPlayer()));
         PlayerDataModel dataModel = DataBase.getPlayerData(event.getPlayer());
+        PacketSender.getInstance().sendHeartsDecreasedPacket(event.getPlayer(), dataModel.getHearts());
         if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
             if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
                 if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
@@ -75,7 +77,11 @@ public class EventListeners implements Listener {
         while(var2.hasNext()) {
             Player onlinePlayer = (Player)var2.next();
             PlayerDataModel dataModel = DataBase.getPlayerData(onlinePlayer);
-            onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()));
+
+            if(!PacketSender.playersWithMod.contains(onlinePlayer)) {
+                onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()));
+            }
+
             if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
                 if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
                     if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {

@@ -3,6 +3,7 @@ package com.sebastian.heartbreaker_pvp;
 import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.command.HeartsGetCommand;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
+import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -32,6 +33,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
             commands.register("heartbreaker_pvp", "Manage HeartbreakerPVP", new HeartbreakerPVPCommand());
             commands.register("pvp_hearts", "View your current heartbreaker hearts", new HeartsGetCommand());
         });
+        PacketSender.init(this);
     }
 
     @Override

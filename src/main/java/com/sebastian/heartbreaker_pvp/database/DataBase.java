@@ -1,5 +1,6 @@
 package com.sebastian.heartbreaker_pvp.database;
 
+import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -21,12 +22,12 @@ public class DataBase {
     }
 
     public static void savePlayerData(Player player, PlayerDataModel data) {
+        PlayerDataModel old = getPlayerData(player).copy();
         if (playerData.containsKey(player.getUniqueId().toString())) {
             playerData.replace(player.getUniqueId().toString(), data);
         } else {
             playerData.put(player.getUniqueId().toString(), data);
         }
-
     }
 
     public static void removeEntryAndSaveToFile(Player plr) {

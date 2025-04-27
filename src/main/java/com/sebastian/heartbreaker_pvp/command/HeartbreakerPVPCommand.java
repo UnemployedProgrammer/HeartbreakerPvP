@@ -130,15 +130,20 @@ public class HeartbreakerPVPCommand implements BasicCommand {
                     showBedrockGUI((Player) view.getPlayer());
                     return;
                 }
+                Player plr = Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName());
+                if(plr == null) {
+                    event.setCancelled(true);
+                    return;
+                }
                 if (event.isLeftClick()) {
-                    PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                    model.setHearts(model.getHearts() + 1);
-                    DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
+                    PlayerDataModel model = DataBase.getPlayerData(plr);
+                    model.setHearts(model.getHearts() + 1, plr);
+                    DataBase.savePlayerData(plr, model);
                 }
                 if (event.isRightClick()) {
-                    PlayerDataModel model = DataBase.getPlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()));
-                    model.setHearts(model.getHearts() - 1);
-                    DataBase.savePlayerData(Bukkit.getPlayer(event.getCurrentItem().getItemMeta().getDisplayName()), model);
+                    PlayerDataModel model = DataBase.getPlayerData(plr);
+                    model.setHearts(model.getHearts() - 1, plr);
+                    DataBase.savePlayerData(plr, model);
                 }
                 view.close();
                 showGUI((Player)view.getPlayer());
@@ -166,9 +171,13 @@ public class HeartbreakerPVPCommand implements BasicCommand {
             String name = view.getTitle().replace("Player: ", "");
             try {
                 Player target = Bukkit.getPlayer(name);
+                if(target == null) {
+                    event.setCancelled(true);
+                    return;
+                }
                 if(event.getCurrentItem().getType().equals(Material.GREEN_CONCRETE)) {
                     PlayerDataModel model = DataBase.getPlayerData(target);
-                    model.setHearts(model.getHearts() + 1);
+                    model.setHearts(model.getHearts() + 1, target);
                     DataBase.savePlayerData(target, model);
                     event.setCancelled(true);
                     event.getClickedInventory().setItem(13, getDisplaynameHead(target));
@@ -176,7 +185,7 @@ public class HeartbreakerPVPCommand implements BasicCommand {
                 }
                 if(event.getCurrentItem().getType().equals(Material.RED_CONCRETE)) {
                     PlayerDataModel model = DataBase.getPlayerData(target);
-                    model.setHearts(model.getHearts() - 1);
+                    model.setHearts(model.getHearts() - 1, target);
                     DataBase.savePlayerData(target, model);
                     event.setCancelled(true);
                     event.getClickedInventory().setItem(13, getDisplaynameHead(target));
