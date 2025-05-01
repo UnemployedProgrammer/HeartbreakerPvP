@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class PacketSender {
     public static List<Player> playersWithMod = new ArrayList<>();
 
     private static final String CHANNEL = "heroes:main";
+    private static final String WHITELIST_CHANNEL = "heroes:whitelist";
     private static PacketSender INSTANCE;
     private HeartbreakerPvP plugin;
 
@@ -41,6 +43,7 @@ public class PacketSender {
                 this::handleModInstalledMessage
         );
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, CHANNEL);
+        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, WHITELIST_CHANNEL);
     }
 
     public static PacketSender getInstance() {
@@ -58,31 +61,40 @@ public class PacketSender {
     }
 
     public void sendWhitelistPacket(Player player) {
-        if (!playersWithMod.contains(player)) {
-            return;
-        }
+        if (!playersWithMod.contains(player)) return;
 
-        List<String> whitelist = Bukkit.getServer().getWhitelistedPlayers().stream()
+        List<String> whitelist = Bukkit.getWhitelistedPlayers().stream()
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         try {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            DataOutputStream out = new DataOutputStream(byteStream);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(bos);
 
-            // Write the size first (using varint-like format)
-            out.writeShort(whitelist.size());
+            // Write list size as VarInt
+            writeVarInt(dos, whitelist.size());
 
-            // Write each name
+            // Write each name properly
             for (String name : whitelist) {
-                out.writeUTF(name); // UTF-8 encoded string with length prefix
+                byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
+                writeVarInt(dos, nameBytes.length);
+                dos.write(nameBytes);
             }
 
-            player.sendPluginMessage(plugin, CHANNEL, byteStream.toByteArray());
+            player.sendPluginMessage(plugin, WHITELIST_CHANNEL, bos.toByteArray());
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to send whitelist packet", e);
         }
+    }
+
+    // Proper VarInt implementation for Paper
+    private void writeVarInt(DataOutputStream out, int value) throws IOException {
+        while ((value & 0xFFFFFF80) != 0L) {
+            out.writeByte((value & 0x7F) | 0x80);
+            value >>>= 7;
+        }
+        out.writeByte(value & 0x7F);
     }
 
     private void handleModInstalledMessage(String channel, Player player, byte[] message) {
