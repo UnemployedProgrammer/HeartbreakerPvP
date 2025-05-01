@@ -3,9 +3,11 @@ package com.sebastian.heartbreaker_pvp.mod_compat;
 import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 import com.sebastian.heartbreaker_pvp.PlayerStats;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
+import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
@@ -16,9 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -57,29 +57,77 @@ public class PacketSender {
     }
 
     private void handleOpenStats(@NotNull String channel, @NotNull Player player, byte[] bytes) {
-        if (!channel.equals("heroes:mod_installed")) return;
+        if (!channel.equals(OPEN_SCREEN_STATS_CHANNEL)) return;
+        plugin.getLogger().info("Player opened stats screen, sending info!");
         for (OfflinePlayer whitelistedPlayer : Bukkit.getWhitelistedPlayers()) {
-            sendPlayerStatsPacket(player, new PlayerStats(whitelistedPlayer.getName(), whitelistedPlayer));
+            sendPlayerStatsPacket(player, collectStats(whitelistedPlayer));
         }
     }
 
-    public PlayerStats collectStats(OfflinePlayer player) {
-        int heroHearts = 3;
-        if(player.getPlayer() == null) return new PlayerStats(player.getName(), 0, 0, 0, 0, 0, heroHearts, 0, 0, 0, 0F, 0);
+    public PlayerStats collectStats(OfflinePlayer offlinePlayer) {
+        String username = offlinePlayer.getName();
+        UUID playerId = offlinePlayer.getUniqueId();
+
+        // Initialize default values
+        float experienceProgress = 0;
+        int experienceLevel = 0;
+        int health = 0;
+        int absorption = 0;
+        int maxHealth = 20;
+
+        // Load persistent data that works even when offline
+        int kills = offlinePlayer.getStatistic(Statistic.MOB_KILLS);
+        int deaths = offlinePlayer.getStatistic(Statistic.DEATHS);
+        int blocksBroken = calculateTotalBlocksMined(offlinePlayer);
+        int blocksPlaced = calculateTotalBlocksPlaced(offlinePlayer);
+        int playerKills = offlinePlayer.getStatistic(Statistic.PLAYER_KILLS);
+
+        // Get live data if player is online
+        if (offlinePlayer.isOnline()) {
+            Player player = (Player) offlinePlayer;
+            experienceProgress = player.getExp();
+            experienceLevel = player.getLevel();
+            health = (int) player.getHealth();
+            absorption = (int) player.getAbsorptionAmount();
+            maxHealth = (int) player.getMaxHealth();
+        }
+
         return new PlayerStats(
-                player.getName(),
-                (int) player.getPlayer().getHealth(),
-                (int) player.getPlayer().getAbsorptionAmount(),
-                (int) player.getPlayer().getMaxHealth(),
-                player.getPlayer().getStatistic(Statistic.KILL_ENTITY),        // Your custom method
-                player.getPlayer().getStatistic(Statistic.DEATHS),       // Your custom method
-                heroHearts,   // Your custom system
-                player.getPlayer().getStatistic(Statistic.MINE_BLOCK),
-                player.getPlayer().getStatistic(Statistic.BLOCK),
-                getPlayerKills(player),
-                player.getExp(),
-                player.getLevel()
+                username,
+                health,
+                absorption,
+                maxHealth,
+                kills,
+                deaths,
+                getHeroHearts(offlinePlayer),  // Your custom method
+                blocksBroken,
+                blocksPlaced,
+                playerKills,
+                experienceProgress,
+                experienceLevel
         );
+    }
+
+    private int calculateTotalBlocksMined(OfflinePlayer player) {
+        return Arrays.stream(Material.values())
+                .filter(Material::isBlock)
+                .mapToInt(material -> player.getStatistic(Statistic.MINE_BLOCK, material))
+                .sum();
+    }
+
+    private int getHeroHearts(OfflinePlayer plr) {
+        if(plr.isOnline() && plr.getPlayer() != null) {
+            return DataBase.getPlayerData(plr.getPlayer()).getHearts();
+        }
+
+        return DataFileComunicator.readPlayerFile(plr).getHearts();
+    }
+
+    private int calculateTotalBlocksPlaced(OfflinePlayer player) {
+        return Arrays.stream(Material.values())
+                .filter(Material::isBlock)
+                .mapToInt(material -> player.getStatistic(Statistic.USE_ITEM, material))
+                .sum();
     }
 
     public static PacketSender getInstance() {
@@ -131,8 +179,12 @@ public class PacketSender {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(bos);
 
-            // Write all fields in EXACTLY the same order as the CODEC
-            dos.writeUTF(stats.username());
+            // Write username with VarInt length encoding
+            byte[] usernameBytes = stats.username().getBytes(StandardCharsets.UTF_8);
+            writeVarInt(dos, usernameBytes.length);
+            dos.write(usernameBytes);
+
+            // Write other fields in EXACT order
             dos.writeInt(stats.health());
             dos.writeInt(stats.absorptionHealth());
             dos.writeInt(stats.maxHealth());
@@ -145,7 +197,7 @@ public class PacketSender {
             dos.writeFloat(stats.experienceProgress());
             dos.writeInt(stats.experienceLevel());
 
-            player.sendPluginMessage(plugin, STATS_CHANNEL, bos.toByteArray());
+            player.sendPluginMessage(plugin, "heroes:player_stats", bos.toByteArray());
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to send player stats packet", e);
         }
