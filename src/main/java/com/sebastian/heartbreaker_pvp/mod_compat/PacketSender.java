@@ -4,6 +4,7 @@ import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 import com.sebastian.heartbreaker_pvp.PlayerStats;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
+import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class PacketSender {
 
     public static List<Player> playersWithMod = new ArrayList<>();
+    private static List<Material> BLOCK_MATERIALS;
 
     private static final String CHANNEL = "heroes:main";
     private static final String WHITELIST_CHANNEL = "heroes:whitelist";
@@ -54,43 +56,92 @@ public class PacketSender {
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, WHITELIST_CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, STATS_CHANNEL);
+
+        BLOCK_MATERIALS = Arrays.stream(Material.values())
+                .filter(material ->
+                        material.isBlock() &&
+                                !material.isLegacy() // Ausschluss-Kriterium
+                )
+                .collect(Collectors.toList());
+
+        plugin.getLogger().info("Loaded " + BLOCK_MATERIALS.size() + " non-legacy block materials.");
     }
 
     private void handleOpenStats(@NotNull String channel, @NotNull Player player, byte[] bytes) {
         if (!channel.equals(OPEN_SCREEN_STATS_CHANNEL)) return;
+
         plugin.getLogger().info("Player opened stats screen, sending info!");
-        for (OfflinePlayer whitelistedPlayer : Bukkit.getWhitelistedPlayers()) {
-            sendPlayerStatsPacket(player, collectStats(whitelistedPlayer));
-        }
+        List<OfflinePlayer> whitelistedPlayers = new ArrayList<>(Bukkit.getWhitelistedPlayers());
+
+        // Asynchron verarbeiten
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (OfflinePlayer whitelisted : whitelistedPlayers) {
+                PlayerStats stats = collectStats(whitelisted);
+
+                // Zurück zum Hauptthread für Plugin Messages
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    sendPlayerStatsPacket(player, stats);
+                });
+
+                // Kurze Pause zur Lastverteilung (10ms)
+                try { Thread.sleep(10); }
+                catch (InterruptedException e) {}
+            }
+        });
     }
 
     public PlayerStats collectStats(OfflinePlayer offlinePlayer) {
         String username = offlinePlayer.getName();
         UUID playerId = offlinePlayer.getUniqueId();
 
-        // Initialize default values
+        // LIVE-Daten (wenn Spieler online ist)
+        Player onlinePlayer = offlinePlayer.isOnline() ? offlinePlayer.getPlayer() : null;
+
+        // ### XP & Level ###
         float experienceProgress = 0;
         int experienceLevel = 0;
+        if (onlinePlayer != null) {
+            // Echtzeit-Daten vom Online-Spieler
+            experienceProgress = onlinePlayer.getExp();
+            experienceLevel = onlinePlayer.getLevel();
+        } else {
+            experienceProgress = -1;
+            experienceLevel = -1;
+        }
+
+        // ### Gesundheit & Absorption ###
         int health = 0;
         int absorption = 0;
         int maxHealth = 20;
-
-        // Load persistent data that works even when offline
-        int kills = offlinePlayer.getStatistic(Statistic.MOB_KILLS);
-        int deaths = offlinePlayer.getStatistic(Statistic.DEATHS);
-        int blocksBroken = calculateTotalBlocksMined(offlinePlayer);
-        int blocksPlaced = calculateTotalBlocksPlaced(offlinePlayer);
-        int playerKills = offlinePlayer.getStatistic(Statistic.PLAYER_KILLS);
-
-        // Get live data if player is online
-        if (offlinePlayer.isOnline()) {
-            Player player = (Player) offlinePlayer;
-            experienceProgress = player.getExp();
-            experienceLevel = player.getLevel();
-            health = (int) player.getHealth();
-            absorption = (int) player.getAbsorptionAmount();
-            maxHealth = (int) player.getMaxHealth();
+        if (onlinePlayer != null) {
+            health = (int) onlinePlayer.getHealth();
+            absorption = (int) onlinePlayer.getAbsorptionAmount();
+            maxHealth = (int) onlinePlayer.getMaxHealth();
         }
+
+        // ### Statistiken ###
+        int kills = onlinePlayer != null
+                ? onlinePlayer.getStatistic(Statistic.MOB_KILLS)
+                : offlinePlayer.getStatistic(Statistic.MOB_KILLS);
+
+        int deaths = onlinePlayer != null
+                ? onlinePlayer.getStatistic(Statistic.DEATHS)
+                : offlinePlayer.getStatistic(Statistic.DEATHS);
+
+        int blocksBroken = onlinePlayer != null
+                ? calculateTotalBlocksMined(onlinePlayer)
+                : calculateTotalBlocksMined(offlinePlayer);
+
+        int blocksPlaced = onlinePlayer != null
+                ? calculateTotalBlocksPlaced(onlinePlayer)
+                : calculateTotalBlocksPlaced(offlinePlayer);
+
+        int playerKills = onlinePlayer != null
+                ? onlinePlayer.getStatistic(Statistic.PLAYER_KILLS)
+                : offlinePlayer.getStatistic(Statistic.PLAYER_KILLS);
+
+        // ### Hero Hearts ###
+        int heroHearts = getHeroHearts(offlinePlayer); // Eigene Methode mit Offline-Support
 
         return new PlayerStats(
                 username,
@@ -99,7 +150,7 @@ public class PacketSender {
                 maxHealth,
                 kills,
                 deaths,
-                getHeroHearts(offlinePlayer),  // Your custom method
+                heroHearts,
                 blocksBroken,
                 blocksPlaced,
                 playerKills,
@@ -109,23 +160,24 @@ public class PacketSender {
     }
 
     private int calculateTotalBlocksMined(OfflinePlayer player) {
-        return Arrays.stream(Material.values())
-                .filter(Material::isBlock)
+        return BLOCK_MATERIALS.stream()
                 .mapToInt(material -> player.getStatistic(Statistic.MINE_BLOCK, material))
                 .sum();
     }
 
     private int getHeroHearts(OfflinePlayer plr) {
-        if(plr.isOnline() && plr.getPlayer() != null) {
+        // Echtzeit-Daten, wenn online
+        if (plr.isOnline() && plr.getPlayer() != null) {
             return DataBase.getPlayerData(plr.getPlayer()).getHearts();
         }
 
-        return DataFileComunicator.readPlayerFile(plr).getHearts();
+        // Offline-Daten aus gespeichertem Zustand
+        PlayerDataModel cachedData = DataFileComunicator.readPlayerFile(plr);
+        return cachedData != null ? cachedData.getHearts() : 0;
     }
 
     private int calculateTotalBlocksPlaced(OfflinePlayer player) {
-        return Arrays.stream(Material.values())
-                .filter(Material::isBlock)
+        return BLOCK_MATERIALS.stream()
                 .mapToInt(material -> player.getStatistic(Statistic.USE_ITEM, material))
                 .sum();
     }
