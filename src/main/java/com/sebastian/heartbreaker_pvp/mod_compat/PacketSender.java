@@ -32,6 +32,8 @@ public class PacketSender {
     private static final String WHITELIST_CHANNEL = "heroes:whitelist";
     private static final String STATS_CHANNEL = "heroes:player_stats";
     private static final String OPEN_SCREEN_STATS_CHANNEL = "heroes:open_stats";
+    private static final String TIME_LEFT_CHANNEL = "heroes:time_update";
+    private static final String IN_A_FIGHT_CHANNEL = "heroes:heroes:in_fight";
     private static PacketSender INSTANCE;
     private HeartbreakerPvP plugin;
 
@@ -56,6 +58,8 @@ public class PacketSender {
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, WHITELIST_CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, STATS_CHANNEL);
+        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, TIME_LEFT_CHANNEL);
+        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, IN_A_FIGHT_CHANNEL);
 
         BLOCK_MATERIALS = Arrays.stream(Material.values())
                 .filter(material ->
@@ -276,5 +280,29 @@ public class PacketSender {
             sendHeartsDecreasedPacket(player, DataBase.getPlayerData(player).getHearts());
             sendWhitelistPacket(player);
         }, 20);
+    }
+
+    //TIME LIMIT
+
+    public void sendTimeLeftPacket(Player player, int timeLeft) {
+        if (!playersWithMod.contains(player)) {
+            return;
+        }
+
+        plugin.getLogger().info("Sending time left packet to " + player.getName());
+
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.putInt(timeLeft); // Supports full int range (-1 to 2,147,483,647)
+        player.sendPluginMessage(plugin, TIME_LEFT_CHANNEL, buffer.array());
+    }
+
+    //FIGHT MECHANIC
+
+    public void sendInFightStatus(Player player, boolean inCombat) {
+        if (!playersWithMod.contains(player)) return;
+
+        ByteBuffer buffer = ByteBuffer.allocate(1);
+        buffer.put((byte) (inCombat ? 1 : 0)); // Boolean → byte conversion
+        player.sendPluginMessage(plugin, IN_A_FIGHT_CHANNEL, buffer.array());
     }
 }

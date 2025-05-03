@@ -6,6 +6,7 @@ import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
+import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -95,6 +96,7 @@ public class EventListeners implements Listener {
             }
         }
 
+        TimeLimitManager.serverTick();
     }
 
     @EventHandler

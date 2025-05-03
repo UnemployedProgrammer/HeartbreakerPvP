@@ -1,5 +1,6 @@
 package com.sebastian.heartbreaker_pvp;
 
+import com.sebastian.heartbreaker_pvp.command.DebugCommands;
 import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.command.HeartsGetCommand;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
@@ -34,6 +35,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
             commands.register("pvp_hearts", "View your current heartbreaker hearts", new HeartsGetCommand());
         });
         PacketSender.init(this);
+        DebugCommands.register(this);
     }
 
     @Override
