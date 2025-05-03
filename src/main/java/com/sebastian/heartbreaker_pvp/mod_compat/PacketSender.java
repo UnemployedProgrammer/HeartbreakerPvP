@@ -60,7 +60,7 @@ public class PacketSender {
         BLOCK_MATERIALS = Arrays.stream(Material.values())
                 .filter(material ->
                         material.isBlock() &&
-                                !material.isLegacy() // Ausschluss-Kriterium
+                                !material.isLegacy()
                 )
                 .collect(Collectors.toList());
 
