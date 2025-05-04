@@ -42,6 +42,30 @@ public class PlayerDataModel {
         return lastResetTimeLimit.toLocalDate().isBefore(now.toLocalDate());
     }
 
+    public int getTimeLimit() {
+        return timeLimit;
+    }
+
+    public LocalDateTime getLastResetTimeLimit() {
+        return lastResetTimeLimit;
+    }
+
+    public void setLastResetTimeLimit(LocalDateTime lastResetTimeLimit) {
+        this.lastResetTimeLimit = lastResetTimeLimit;
+    }
+
+    public void setTimeLimit(int timeLimit) {
+        this.timeLimit = timeLimit;
+    }
+
+    public boolean isInAFight() {
+        return inAFight;
+    }
+
+    public void setInAFight(boolean inAFight) {
+        this.inAFight = inAFight;
+    }
+
     public boolean hasTimeLeft() {
         if(!TimeLimitManager.GLOBAL_TIME_LIMIT_ENABLED) return true;
         if(wasResetYesterday()) {
@@ -51,8 +75,36 @@ public class PlayerDataModel {
         return timeLimit > 0;
     }
 
+    //TODO: Need to fix this:
+    /*
+        [21:44:22 WARN]: [HeartBreaker] No DataModel, returning new PlayerDataModel.
+[21:44:22 ERROR]: Could not pass event ServerTickEndEvent to HeartbreakerPvP v1.0-BETA
+java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because "com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager.GLOBAL_TIME_LIMIT" is null
+	at Heartbreaker PvP-1.0-BETA.jar/com.sebastian.heartbreaker_pvp.database.PlayerDataModel.<init>(PlayerDataModel.java:16) ~[Heartbreaker PvP-1.0-BETA.jar:?]
+	at Heartbreaker PvP-1.0-BETA.jar/com.sebastian.heartbreaker_pvp.database.DataBase.getPlayerData(DataBase.java:18) ~[Heartbreaker PvP-1.0-BETA.jar:?]
+	at Heartbreaker PvP-1.0-BETA.jar/com.sebastian.heartbreaker_pvp.EventListeners.onServerTickEnd(EventListeners.java:80) ~[Heartbreaker PvP-1.0-BETA.jar:?]
+	at co.aikar.timings.TimedEventExecutor.execute(TimedEventExecutor.java:80) ~[paper-api-1.21.4-R0.1-SNAPSHOT.jar:?]
+	at org.bukkit.plugin.RegisteredListener.callEvent(RegisteredListener.java:70) ~[paper-api-1.21.4-R0.1-SNAPSHOT.jar:?]
+	at io.papermc.paper.plugin.manager.PaperEventManager.callEvent(PaperEventManager.java:54) ~[paper-1.21.4.jar:1.21.4-138-5395ae3]
+	at io.papermc.paper.plugin.manager.PaperPluginManagerImpl.callEvent(PaperPluginManagerImpl.java:131) ~[paper-1.21.4.jar:1.21.4-138-5395ae3]
+	at org.bukkit.plugin.SimplePluginManager.callEvent(SimplePluginManager.java:628) ~[paper-api-1.21.4-R0.1-SNAPSHOT.jar:?]
+	at org.bukkit.event.Event.callEvent(Event.java:45) ~[paper-api-1.21.4-R0.1-SNAPSHOT.jar:?]
+	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1566) ~[paper-1.21.4.jar:1.21.4-138-5395ae3]
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1251) ~[paper-1.21.4.jar:1.21.4-138-5395ae3]
+	at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:310) ~[paper-1.21.4.jar:1.21.4-138-5395ae3]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
+
+    -> Probably add null check to server end tick method...
+     */
+
     public void decreaseTimeAndSave(Player owner) {
         timeLimit--;
+        DataBase.savePlayerData(owner, this);
+    }
+
+    public void setFightingAndSave(Player owner, Boolean inAFight) {
+        this.inAFight = inAFight;
+        DataBase.savePlayerData(owner, this);
     }
 
     @Override

@@ -22,7 +22,6 @@ public class DataBase {
     }
 
     public static void savePlayerData(Player player, PlayerDataModel data) {
-        PlayerDataModel old = getPlayerData(player).copy();
         if (playerData.containsKey(player.getUniqueId().toString())) {
             playerData.replace(player.getUniqueId().toString(), data);
         } else {
