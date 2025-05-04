@@ -6,6 +6,7 @@ import com.sebastian.heartbreaker_pvp.command.HeartsGetCommand;
 import com.sebastian.heartbreaker_pvp.command.HeroTimeCommand;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
+import com.sebastian.heartbreaker_pvp.time_limit.Settings;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -15,6 +16,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Logger;
 
 public final class HeartbreakerPvP extends JavaPlugin {
@@ -35,6 +41,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
             commands.register("heartbreaker_pvp", "Manage HeartbreakerPVP", new HeartbreakerPVPCommand());
             commands.register("pvp_hearts", "View your current heartbreaker hearts", new HeartsGetCommand());
         });
+        Settings.load(this);
         PacketSender.init(this);
         DebugCommands.register(this);
         HeroTimeCommand.register(this);
@@ -42,6 +49,6 @@ public final class HeartbreakerPvP extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Settings.save(this);
     }
 }
