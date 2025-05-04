@@ -5,6 +5,7 @@ import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
+import com.sebastian.heartbreaker_pvp.fight.FightManager;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -13,6 +14,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -21,7 +23,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.Iterator;
 
 public class EventListeners implements Listener {
-    public static void triggerDeath(Player player) {
+    public static void triggerHeartLoose(Player player) {
         PlayerDataModel dataModel = DataBase.getPlayerData(player);
         dataModel.setHearts(dataModel.getHearts() - 1, player);
         DataBase.savePlayerData(player, dataModel);
@@ -41,10 +43,11 @@ public class EventListeners implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        if (event.getDamageSource().getCausingEntity() instanceof Player) {
-            triggerDeath(event.getPlayer());
-        }
+        FightManager.playerDies(event);
+    }
 
+    public void onPlayerDamage(EntityDamageEvent event) {
+        FightManager.playerDamage(event);
     }
 
     @EventHandler
@@ -68,11 +71,14 @@ public class EventListeners implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        FightManager.playerQuit(event);
         DataBase.removeEntryAndSaveToFile(event.getPlayer());
     }
 
     @EventHandler
     public void onServerTickEnd(ServerTickEndEvent event) {
+        TimeLimitManager.serverTick();
+        FightManager.serverTick();
         Iterator var2 = Bukkit.getOnlinePlayers().iterator();
 
         while(var2.hasNext()) {
@@ -80,7 +86,9 @@ public class EventListeners implements Listener {
             PlayerDataModel dataModel = DataBase.getPlayerData(onlinePlayer);
 
             if(!PacketSender.playersWithMod.contains(onlinePlayer)) {
-                onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()));
+
+                String timeString = formatSecondsToTime(dataModel.getTimeLimit());
+                onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>")));
             }
 
             if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
@@ -95,8 +103,33 @@ public class EventListeners implements Listener {
                 }
             }
         }
+    }
 
-        TimeLimitManager.serverTick();
+    /**
+     * Converts seconds to a human-readable time format (e.g., "10h 10m 9s")
+     * @param totalSeconds The total number of seconds to convert
+     * @return Formatted string in h m s format (omits zero-value units)
+     */
+    public static String formatSecondsToTime(long totalSeconds) {
+        if (totalSeconds < 0) {
+            return "0s"; // or throw an exception if you prefer
+        }
+
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        StringBuilder builder = new StringBuilder();
+
+        if (hours > 0) {
+            builder.append(hours).append("h ");
+        }
+        if (minutes > 0 || hours > 0) { // Show minutes if there are hours, even if 0
+            builder.append(minutes).append("m ");
+        }
+        builder.append(seconds).append("s");
+
+        return builder.toString().trim(); // trim in case of trailing space
     }
 
     @EventHandler

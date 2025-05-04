@@ -23,7 +23,7 @@ public class PlayerDataModel {
         return this.hearts;
     }
 
-    public void setHearts(int hearts) {
+    private void setHearts(int hearts) {
         this.hearts = Math.clamp((long)hearts, 0, 3);
     }
 
@@ -38,6 +38,14 @@ public class PlayerDataModel {
 
     public boolean isTimerPaused() {
         return timerPaused;
+    }
+
+    public void setStillInAFightFor(int stillInAFightFor) {
+        this.stillInAFightFor = stillInAFightFor;
+    }
+
+    public int getStillInAFightFor() {
+        return stillInAFightFor;
     }
 
     private PlayerDataModel(int hearts) {
@@ -125,6 +133,7 @@ java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" bec
 
     public void setFightingAndSave(Player owner, Boolean inAFight) {
         this.inAFight = inAFight;
+        PacketSender.getInstance().sendInFightStatus(owner, inAFight);
         DataBase.savePlayerData(owner, this);
     }
 
