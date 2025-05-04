@@ -33,7 +33,7 @@ public class PacketSender {
     private static final String STATS_CHANNEL = "heroes:player_stats";
     private static final String OPEN_SCREEN_STATS_CHANNEL = "heroes:open_stats";
     private static final String TIME_LEFT_CHANNEL = "heroes:time_update";
-    private static final String IN_A_FIGHT_CHANNEL = "heroes:heroes:in_fight";
+    private static final String IN_A_FIGHT_CHANNEL = "heroes:in_fight";
     private static PacketSender INSTANCE;
     private HeartbreakerPvP plugin;
 
@@ -289,7 +289,7 @@ public class PacketSender {
             return;
         }
 
-        plugin.getLogger().info("Sending time left packet to " + player.getName());
+        //plugin.getLogger().info("Sending time left packet to " + player.getName());
 
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.putInt(timeLeft); // Supports full int range (-1 to 2,147,483,647)

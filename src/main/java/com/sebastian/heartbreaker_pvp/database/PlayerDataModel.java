@@ -16,6 +16,8 @@ public class PlayerDataModel {
     private int timeLimit = TimeLimitManager.GLOBAL_TIME_LIMIT; //60 sec * 60 min = 1h
     private LocalDateTime lastResetTimeLimit = LocalDateTime.now(ZoneId.of("UTC"));
     private boolean inAFight = false;
+    private int stillInAFightFor = 0;
+    private boolean timerPaused = false;
 
     public int getHearts() {
         return this.hearts;
@@ -28,6 +30,14 @@ public class PlayerDataModel {
     public void setHearts(int hearts, Player player) {
         this.setHearts(hearts);
         PacketSender.getInstance().sendHeartsDecreasedPacket(player, hearts);
+    }
+
+    public void setTimerPaused(boolean timerPaused) {
+        this.timerPaused = timerPaused;
+    }
+
+    public boolean isTimerPaused() {
+        return timerPaused;
     }
 
     private PlayerDataModel(int hearts) {
@@ -102,8 +112,24 @@ java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" bec
         DataBase.savePlayerData(owner, this);
     }
 
+    public void setTimeAndSave(Player owner, Integer time) {
+        timeLimit = time;
+        DataBase.savePlayerData(owner, this);
+    }
+
+    public Integer modifyTimeAndSave(Player owner, Integer delta) {
+        timeLimit += delta;
+        DataBase.savePlayerData(owner, this);
+        return timeLimit;
+    }
+
     public void setFightingAndSave(Player owner, Boolean inAFight) {
         this.inAFight = inAFight;
+        DataBase.savePlayerData(owner, this);
+    }
+
+    public void setTimerPausedAndSave(Player owner, Boolean timerPaused) {
+        this.timerPaused = timerPaused;
         DataBase.savePlayerData(owner, this);
     }
 

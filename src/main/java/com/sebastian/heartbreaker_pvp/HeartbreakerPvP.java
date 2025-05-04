@@ -3,6 +3,7 @@ package com.sebastian.heartbreaker_pvp;
 import com.sebastian.heartbreaker_pvp.command.DebugCommands;
 import com.sebastian.heartbreaker_pvp.command.HeartbreakerPVPCommand;
 import com.sebastian.heartbreaker_pvp.command.HeartsGetCommand;
+import com.sebastian.heartbreaker_pvp.command.HeroTimeCommand;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import io.papermc.paper.command.brigadier.BasicCommand;
@@ -36,6 +37,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
         });
         PacketSender.init(this);
         DebugCommands.register(this);
+        HeroTimeCommand.register(this);
     }
 
     @Override
