@@ -46,6 +46,7 @@ public class EventListeners implements Listener {
         FightManager.playerDies(event);
     }
 
+    @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
         FightManager.playerDamage(event);
     }

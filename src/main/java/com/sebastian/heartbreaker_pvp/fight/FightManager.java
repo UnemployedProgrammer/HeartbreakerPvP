@@ -30,11 +30,11 @@ public class FightManager {
                 PlayerDataModel plr = DataBase.getPlayerData(onlinePlayer);
                 if (plr.isInAFight()) {
                     if (plr.getStillInAFightFor() <= 0) {
-                        plr.setStillInAFightFor(30);
-                        plr.setFightingAndSave(onlinePlayer, false);
+                        plr.setInAFight(false);
+                        plr.setStillInAFightForAndSave(30, onlinePlayer);
                         onlinePlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOT_IN_FIGHT_ANYMORE));
                     }
-                    plr.setStillInAFightFor(plr.getStillInAFightFor() - 1);
+                    plr.setStillInAFightForAndSave(plr.getStillInAFightFor() - 1, onlinePlayer);
                 }
             }
         }
@@ -59,27 +59,25 @@ public class FightManager {
     }
 
     public static void playerDamage(EntityDamageEvent event) {
-        if(event.getEntity() instanceof Player damagedPlayer) {
-            //A player was damaged
+        if (event.getEntity() instanceof Player damagedPlayer) {
             Pair<Boolean, Player> damagedByAnotherEntity = isDamagedByAnotherPlayer(event);
             if (damagedByAnotherEntity.a()) {
-                //Damaged by another player
-
-                //Set Damaged Player Fighting
+                // Damaged player logic
                 PlayerDataModel playerDataModel = DataBase.getPlayerData(damagedPlayer);
-                if(!playerDataModel.isInAFight()) {
+                if (!playerDataModel.isInAFight()) {
                     damagedPlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOW_IN_FIGHT));
                 }
-                playerDataModel.setStillInAFightFor(30);
-                playerDataModel.setFightingAndSave(damagedPlayer, true);
+                playerDataModel.setStillInAFightFor(30, damagedPlayer);
+                playerDataModel.setFightingAndSave(damagedPlayer, true); // Correct for damaged player
 
-                //Set Enemy Fighting
-                PlayerDataModel enemyPlayerDataModel = DataBase.getPlayerData(damagedByAnotherEntity.b());
-                if(!enemyPlayerDataModel.isInAFight()) {
-                    damagedPlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOW_IN_FIGHT));
+                // Attacker (enemy) logic
+                Player attacker = damagedByAnotherEntity.b();
+                PlayerDataModel enemyPlayerDataModel = DataBase.getPlayerData(attacker);
+                if (!enemyPlayerDataModel.isInAFight()) {
+                    attacker.sendMessage(MiniMessage.miniMessage().deserialize(NOW_IN_FIGHT)); // Send message to attacker
                 }
-                enemyPlayerDataModel.setStillInAFightFor(30);
-                enemyPlayerDataModel.setFightingAndSave(damagedPlayer, true);
+                enemyPlayerDataModel.setStillInAFightFor(30, attacker);
+                enemyPlayerDataModel.setFightingAndSave(attacker, true); // Correct for attacker
             }
         }
     }
