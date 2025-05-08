@@ -34,6 +34,7 @@ public class PacketSender {
     private static final String OPEN_SCREEN_STATS_CHANNEL = "heroes:open_stats";
     private static final String TIME_LEFT_CHANNEL = "heroes:time_update";
     private static final String IN_A_FIGHT_CHANNEL = "heroes:in_fight";
+    private static final String FIGHT_TIME_LEFT_CHANNEL = "heroes:fight_time_update";
     private static PacketSender INSTANCE;
     private HeartbreakerPvP plugin;
 
@@ -60,6 +61,7 @@ public class PacketSender {
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, STATS_CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, TIME_LEFT_CHANNEL);
         plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, IN_A_FIGHT_CHANNEL);
+        plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, FIGHT_TIME_LEFT_CHANNEL);
 
         BLOCK_MATERIALS = Arrays.stream(Material.values())
                 .filter(material ->
@@ -304,5 +306,14 @@ public class PacketSender {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         buffer.put((byte) (inCombat ? 1 : 0)); // Boolean → byte conversion
         player.sendPluginMessage(plugin, IN_A_FIGHT_CHANNEL, buffer.array());
+    }
+
+    public void sendFightTimeLeftPacket(Player player, int timeLeft, int totalTime) {
+        if (!playersWithMod.contains(player)) return;
+
+        ByteBuffer buffer = ByteBuffer.allocate(8); // 4 bytes per int
+        buffer.putInt(timeLeft);
+        buffer.putInt(totalTime); // Add new value
+        player.sendPluginMessage(plugin, FIGHT_TIME_LEFT_CHANNEL, buffer.array());
     }
 }
