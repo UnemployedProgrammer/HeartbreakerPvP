@@ -92,7 +92,7 @@ public class EventListeners implements Listener {
                 String timeString = formatSecondsToTime(dataModel.getTimeLimit());
                 Component actionBarMessage = ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>"));
                 if(dataModel.isInAFight()) {
-                    actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> \uD83D\uDDE1 " + dataModel.getStillInAFightFor() + "s </red>"));
+                    actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> Kampf: " + dataModel.getStillInAFightFor() + "s </red>"));
                 }
                 onlinePlayer.sendActionBar(actionBarMessage);
             }
