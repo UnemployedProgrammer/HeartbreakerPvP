@@ -3,6 +3,7 @@ package com.sebastian.heartbreaker_pvp.fight;
 import com.sebastian.heartbreaker_pvp.Pair;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
+import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.damage.DamageSource;
@@ -32,6 +33,7 @@ public class FightManager {
                     if (plr.getStillInAFightFor() <= 0) {
                         plr.setInAFight(false);
                         plr.setStillInAFightForAndSave(30, onlinePlayer);
+                        PacketSender.getInstance().sendInFightStatus(onlinePlayer, false);
                         onlinePlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOT_IN_FIGHT_ANYMORE));
                     }
                     plr.setStillInAFightForAndSave(plr.getStillInAFightFor() - 1, onlinePlayer);

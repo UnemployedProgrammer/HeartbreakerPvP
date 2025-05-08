@@ -8,6 +8,7 @@ import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.fight.FightManager;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -89,7 +90,11 @@ public class EventListeners implements Listener {
             if(!PacketSender.playersWithMod.contains(onlinePlayer)) {
 
                 String timeString = formatSecondsToTime(dataModel.getTimeLimit());
-                onlinePlayer.sendActionBar(ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>")));
+                Component actionBarMessage = ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>"));
+                if(dataModel.isInAFight()) {
+                    actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> \uD83D\uDDE1 " + dataModel.getStillInAFightFor() + "s </red>"));
+                }
+                onlinePlayer.sendActionBar(actionBarMessage);
             }
 
             if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
