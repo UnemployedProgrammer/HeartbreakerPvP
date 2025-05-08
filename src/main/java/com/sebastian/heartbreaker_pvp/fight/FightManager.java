@@ -20,15 +20,22 @@ public class FightManager {
     public static String NOW_IN_FIGHT = "<gold>Helden »</gold> <red>Du bist jetzt im Kampf!</red>"; //Needs Change
     public static String NOT_IN_FIGHT_ANYMORE = "<gold>Helden »</gold> <green>Du bist jetzt nicht mehr im Kampf!</green>"; //Needs Change
 
+    private static int secondClock;
     public static void serverTick() {
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            PlayerDataModel plr = DataBase.getPlayerData(onlinePlayer);
-            if(plr.isInAFight()) {
-                if(plr.getStillInAFightFor() <= 0) {
-                    plr.setStillInAFightFor(30);
-                    plr.setFightingAndSave(onlinePlayer, false);
+        secondClock++;
+        if(secondClock >= 20) {
+            secondClock = 0;
+            //Calls every sec
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                PlayerDataModel plr = DataBase.getPlayerData(onlinePlayer);
+                if (plr.isInAFight()) {
+                    if (plr.getStillInAFightFor() <= 0) {
+                        plr.setStillInAFightFor(30);
+                        plr.setFightingAndSave(onlinePlayer, false);
+                        onlinePlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOT_IN_FIGHT_ANYMORE));
+                    }
+                    plr.setStillInAFightFor(plr.getStillInAFightFor() - 1);
                 }
-                plr.setStillInAFightFor(plr.getStillInAFightFor() - 1);
             }
         }
     }
