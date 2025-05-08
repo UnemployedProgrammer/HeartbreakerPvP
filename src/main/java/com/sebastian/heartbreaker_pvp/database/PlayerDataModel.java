@@ -44,6 +44,11 @@ public class PlayerDataModel {
         this.stillInAFightFor = stillInAFightFor;
     }
 
+    public void setStillInAFightForAndSave(int stillInAFightFor, Player owner) {
+        this.stillInAFightFor = stillInAFightFor;
+        DataBase.savePlayerData(owner, this);
+    }
+
     public int getStillInAFightFor() {
         return stillInAFightFor;
     }
