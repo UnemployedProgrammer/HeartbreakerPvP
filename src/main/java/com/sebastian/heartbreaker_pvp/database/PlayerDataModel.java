@@ -87,8 +87,9 @@ public class PlayerDataModel {
         return inAFight;
     }
 
-    public void setInAFight(boolean inAFight) {
+    public void setInAFight(boolean inAFight, Player owner) {
         this.inAFight = inAFight;
+        PacketSender.getInstance().sendInFightStatus(owner, inAFight);
     }
 
     public boolean hasTimeLeft() {

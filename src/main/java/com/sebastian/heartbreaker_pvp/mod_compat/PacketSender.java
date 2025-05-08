@@ -312,8 +312,8 @@ public class PacketSender {
         if (!playersWithMod.contains(player)) return;
 
         ByteBuffer buffer = ByteBuffer.allocate(8); // 4 bytes per int
-        buffer.putInt(timeLeft);
-        buffer.putInt(totalTime); // Add new value
+        buffer.putInt(timeLeft * 20);
+        buffer.putInt(totalTime * 20); // Add new value
         player.sendPluginMessage(plugin, FIGHT_TIME_LEFT_CHANNEL, buffer.array());
     }
 }

@@ -31,7 +31,7 @@ public class FightManager {
                 PlayerDataModel plr = DataBase.getPlayerData(onlinePlayer);
                 if (plr.isInAFight()) {
                     if (plr.getStillInAFightFor() <= 0) {
-                        plr.setInAFight(false);
+                        plr.setInAFight(false, onlinePlayer);
                         plr.setStillInAFightForAndSave(30, onlinePlayer);
                         PacketSender.getInstance().sendInFightStatus(onlinePlayer, false);
                         onlinePlayer.sendMessage(MiniMessage.miniMessage().deserialize(NOT_IN_FIGHT_ANYMORE));
