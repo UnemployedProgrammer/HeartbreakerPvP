@@ -1,5 +1,6 @@
 package com.sebastian.heartbreaker_pvp.fight;
 
+import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 import com.sebastian.heartbreaker_pvp.Pair;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
@@ -45,8 +46,12 @@ public class FightManager {
     public static void playerQuit(PlayerQuitEvent quitEvent) {
         PlayerDataModel playerDataModel = DataBase.getPlayerData(quitEvent.getPlayer());
         if(playerDataModel.isInAFight()) {
-            playerDataModel.setHearts(playerDataModel.getHearts() - 1, quitEvent.getPlayer());
-            playerDataModel.setFightingAndSave(quitEvent.getPlayer(), false);
+            HeartbreakerPvP.getInstance().getServer().getScheduler().runTaskLater(HeartbreakerPvP.getInstance(), () -> {
+                DataBase.modifyValueEvenIfOffline(quitEvent.getPlayer(), model -> {
+                    model.setHearts(playerDataModel.getHearts() - 1, quitEvent.getPlayer());
+                    model.setInAFight(false, quitEvent.getPlayer());
+                });
+            }, 20);
             Bukkit.broadcast(MiniMessage.miniMessage().deserialize(IN_FIGHT_LEFT.replace("%s", quitEvent.getPlayer().getName())));
         }
     }
@@ -54,8 +59,12 @@ public class FightManager {
     public static void playerDies(PlayerDeathEvent event) {
         PlayerDataModel playerDataModel = DataBase.getPlayerData(event.getPlayer());
         if(playerDataModel.isInAFight()) {
-            playerDataModel.setHearts(playerDataModel.getHearts() - 1, event.getPlayer());
-            playerDataModel.setFightingAndSave(event.getPlayer(), false);
+            HeartbreakerPvP.getInstance().getServer().getScheduler().runTaskLater(HeartbreakerPvP.getInstance(), () -> {
+                DataBase.modifyValueEvenIfOffline(event.getPlayer(), model -> {
+                    model.setHearts(playerDataModel.getHearts() - 1, event.getPlayer());
+                    model.setInAFight(false, event.getPlayer());
+                });
+            }, 20);
             Bukkit.broadcast(MiniMessage.miniMessage().deserialize(IN_FIGHT_DIED.replace("%s", event.getPlayer().getName())));
         }
     }

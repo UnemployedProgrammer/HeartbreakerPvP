@@ -27,6 +27,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
 
     public static Logger logger;
     public static File dataFolder;
+    public static HeartbreakerPvP instance;
 
     @Override
     public void onEnable() {
@@ -45,10 +46,15 @@ public final class HeartbreakerPvP extends JavaPlugin {
         PacketSender.init(this);
         DebugCommands.register(this);
         HeroTimeCommand.register(this);
+        instance = this;
     }
 
     @Override
     public void onDisable() {
         Settings.save(this);
+    }
+
+    public static HeartbreakerPvP getInstance() {
+        return instance;
     }
 }
