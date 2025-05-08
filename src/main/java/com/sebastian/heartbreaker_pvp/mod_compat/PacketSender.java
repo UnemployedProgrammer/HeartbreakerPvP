@@ -279,8 +279,11 @@ public class PacketSender {
         plugin.getLogger().info("Player has the HEROES Mod installed!");
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            sendHeartsDecreasedPacket(player, DataBase.getPlayerData(player).getHearts());
+            PlayerDataModel db = DataBase.getPlayerData(player);
+            sendHeartsDecreasedPacket(player, db.getHearts());
             sendWhitelistPacket(player);
+            sendInFightStatus(player, db.isInAFight());
+            sendFightTimeLeftPacket(player, db.getStillInAFightFor(), 30);
         }, 20);
     }
 

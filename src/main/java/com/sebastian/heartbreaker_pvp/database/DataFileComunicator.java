@@ -36,6 +36,30 @@ public class DataFileComunicator {
         }
     }
 
+    public static void savePlayerFile(OfflinePlayer player, PlayerDataModel data) {
+        File dataFolder = HeartbreakerPvP.dataFolder;
+        // File path where the file will be created or written to
+        File filePath = new File(new File(dataFolder, "db"), player.getUniqueId().toString() + ".json");
+        // The content you want to write into the file
+        String content = data.toJson();
+
+        try {
+
+            filePath.delete();
+
+            // Create FileWriter object (true for append mode)
+            FileWriter writer = new FileWriter(filePath, false);
+            // Write content to the file
+            writer.write(content);
+            // Close the writer
+            writer.close();
+
+            HeartbreakerPvP.logger.info("Saved data for player successfully: " + player.getName() + ":" + player.getUniqueId().toString());
+        } catch (IOException e) {
+            HeartbreakerPvP.logger.warning(e.toString());
+        }
+    }
+
     public static PlayerDataModel readPlayerFile(Player player) {
         try {
             // Create a FileReader and BufferedReader to read the file
