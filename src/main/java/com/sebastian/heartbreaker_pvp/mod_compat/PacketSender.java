@@ -184,7 +184,13 @@ public class PacketSender {
 
     private int calculateTotalBlocksPlaced(OfflinePlayer player) {
         return BLOCK_MATERIALS.stream()
-                .mapToInt(material -> player.getStatistic(Statistic.USE_ITEM, material))
+                .mapToInt(material -> {
+                    try {
+                        return player.getStatistic(Statistic.USE_ITEM, material);
+                    } catch (IllegalArgumentException ignored) {
+                        return 0; //skip
+                    }
+                })
                 .sum();
     }
 
@@ -208,7 +214,7 @@ public class PacketSender {
         List<String> whitelist = Bukkit.getWhitelistedPlayers().stream()
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
