@@ -47,6 +47,8 @@ public class PlayerDataModel {
         this.timerPaused = timerPaused;
     }
 
+    //TODO: Finish translating
+
     public boolean isTimerPaused() {
         return timerPaused;
     }
