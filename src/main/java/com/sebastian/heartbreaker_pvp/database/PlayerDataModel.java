@@ -5,6 +5,8 @@ import com.sebastian.heartbreaker_pvp.GsonUtils;
 import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
+import com.sebastian.heartbreaker_pvp.translations.Language;
+import com.sebastian.heartbreaker_pvp.translations.Translations;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,7 @@ public class PlayerDataModel {
     private boolean inAFight = false;
     private int stillInAFightFor = 0;
     private boolean timerPaused = false;
+    private String language = "not_set";
 
     public int getHearts() {
         return this.hearts;
@@ -30,6 +33,14 @@ public class PlayerDataModel {
     public void setHearts(int hearts, Player player) {
         this.setHearts(hearts);
         PacketSender.getInstance().sendHeartsDecreasedPacket(player, hearts);
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language.getCode();
+    }
+
+    public Language getLanguage() {
+        return Translations.getLanguageFromCode(language);
     }
 
     public void setTimerPaused(boolean timerPaused) {

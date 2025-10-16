@@ -78,6 +78,9 @@ public class PacketSender {
 
         plugin.getLogger().info("Player opened stats screen, sending info!");
         List<OfflinePlayer> whitelistedPlayers = new ArrayList<>(Bukkit.getWhitelistedPlayers());
+        if(whitelistedPlayers.isEmpty()) {
+            plugin.getLogger().info("No info to send to player, whitelist empty.");
+        }
 
         // Asynchron verarbeiten
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -262,6 +265,7 @@ public class PacketSender {
             dos.writeInt(stats.experienceLevel());
 
             player.sendPluginMessage(plugin, "heroes:player_stats", bos.toByteArray());
+            plugin.getLogger().log(Level.INFO, "Send packet successfully!");
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to send player stats packet", e);
         }
