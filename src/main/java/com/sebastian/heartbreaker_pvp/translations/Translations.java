@@ -1,5 +1,7 @@
 package com.sebastian.heartbreaker_pvp.translations;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Translations {
     public static final Language FALLBACK = new AmericanEnglishLanguage();
     private static ConcurrentHashMap<String, Language> translations = new ConcurrentHashMap<>();
+    private static MiniMessage MM = MiniMessage.miniMessage();
 
     public static void registerLanguage(Language language) {
         translations.putIfAbsent(language.getCode(), language);
@@ -18,6 +21,14 @@ public class Translations {
 
     public static String getString(Language lang, String key) {
         return lang.getString(key);
+    }
+
+    public static Component getComponent(Language lang, String key) {
+        return MM.deserialize(getString(lang, key));
+    }
+
+    public static Component getComponent(Language lang, String key, Object... args) {
+        return MM.deserialize(getString(lang, key, args));
     }
 
     public static String getString(Language lang, String key, Object... args) {
