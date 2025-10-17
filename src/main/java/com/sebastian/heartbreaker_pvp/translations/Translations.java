@@ -2,26 +2,19 @@ package com.sebastian.heartbreaker_pvp.translations;
 
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Translations {
+    public static final Language FALLBACK = new AmericanEnglishLanguage();
+    private static ConcurrentHashMap<String, Language> translations = new ConcurrentHashMap<>();
 
-    public static final Language FALLBACK = new Language() {
-        @Override
-        public String getCode() {
-            return "en_us";
-        }
-
-        @Override
-        public String getName() {
-            return "English (Fallback, Error occurred)";
-        }
-
-        @Override
-        public String getString(String translationCode) {
-            return "Please choose your language again using /language";
-        }
-    };
+    public static void registerLanguage(Language language) {
+        translations.putIfAbsent(language.getCode(), language);
+    }
 
     public static String getString(Language lang, String key) {
         return lang.getString(key);
@@ -52,8 +45,6 @@ public class Translations {
     }
 
     public static Language getLanguageFromCode(String code) {
-        if(Objects.equals(code, "not_set")) return FALLBACK;
-
-        return FALLBACK;
+        return translations.getOrDefault(code, FALLBACK);
     }
 }

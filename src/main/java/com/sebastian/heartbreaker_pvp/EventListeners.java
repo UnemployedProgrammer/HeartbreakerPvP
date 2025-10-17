@@ -7,6 +7,7 @@ import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.fight.FightManager;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
+import com.sebastian.heartbreaker_pvp.time_limit.Settings;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -20,10 +21,12 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 
 import java.util.Iterator;
 
 public class EventListeners implements Listener {
+    /*
     public static void triggerHeartLoose(Player player) {
         PlayerDataModel dataModel = DataBase.getPlayerData(player);
         dataModel.setHearts(dataModel.getHearts() - 1, player);
@@ -41,6 +44,7 @@ public class EventListeners implements Listener {
         }
 
     }
+     */
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
@@ -141,5 +145,10 @@ public class EventListeners implements Listener {
     @EventHandler
     public void onInventoryTake(InventoryClickEvent clickEvent) {
         HeartbreakerPVPCommand.cancelMove(clickEvent);
+    }
+
+    @EventHandler
+    public void onWorldSave(WorldSaveEvent worldSaveEvent) {
+        Settings.save(HeartbreakerPvP.instance);
     }
 }

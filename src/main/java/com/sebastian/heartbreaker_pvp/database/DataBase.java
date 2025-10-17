@@ -50,6 +50,14 @@ public class DataBase {
         }
     }
 
+    public static PlayerDataModel getEvenIfOffline(OfflinePlayer plr) {
+        if(playerData.containsKey(plr.getUniqueId().toString())) {
+            return playerData.get(plr.getUniqueId().toString());
+        } else {
+            return DataFileComunicator.readPlayerFile(plr);
+        }
+    }
+
     public static void modifyValueEvenIfOffline(Player plr, Consumer<PlayerDataModel> dataModelConsumer) {
         if(playerData.containsKey(plr.getUniqueId().toString())) {
             //Player is online

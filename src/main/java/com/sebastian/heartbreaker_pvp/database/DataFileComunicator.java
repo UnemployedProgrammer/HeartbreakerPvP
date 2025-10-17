@@ -67,7 +67,7 @@ public class DataFileComunicator {
             File filePath = new File(new File(dataFolder, "db"), player.getUniqueId().toString() + ".json");
 
             if(!filePath.exists()) {
-                HeartbreakerPvP.logger.info("Player joins first time, returning empty PlayerDataModel! Player: " + player.getName() + ":" + player.getUniqueId().toString());
+                HeartbreakerPvP.logger.info("Player joins/requested first time, returning empty PlayerDataModel! Player: " + player.getName() + ":" + player.getUniqueId().toString());
                 return new PlayerDataModel();
             }
 
@@ -98,7 +98,7 @@ public class DataFileComunicator {
             File filePath = new File(new File(dataFolder, "db"), player.getUniqueId().toString() + ".json");
 
             if(!filePath.exists()) {
-                HeartbreakerPvP.logger.info("Player joins first time, returning empty PlayerDataModel! Player: " + player.getName() + ":" + player.getUniqueId().toString());
+                HeartbreakerPvP.logger.info("Player joins/requested first time, returning empty PlayerDataModel! Player: " + player.getName() + ":" + player.getUniqueId().toString());
                 return new PlayerDataModel();
             }
 

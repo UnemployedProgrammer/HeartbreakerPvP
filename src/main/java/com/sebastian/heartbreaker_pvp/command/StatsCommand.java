@@ -11,7 +11,10 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.sebastian.heartbreaker_pvp.HeartbreakerPvP;
 import com.sebastian.heartbreaker_pvp.database.DataBase;
+import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
+import com.sebastian.heartbreaker_pvp.translations.Language;
+import com.sebastian.heartbreaker_pvp.translations.Translations;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -22,6 +25,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -59,8 +64,15 @@ public class StatsCommand {
         return target;
     }
 
-    private static void openGui(Player executor, Player targetPlayer) {
+    private static void openGui(Player executor, OfflinePlayer targetPlayer) {
+        //Read data
+        PlayerDataModel executorData = DataBase.getPlayerData(executor);
+        Language executorDataLanguage = executorData.getLanguage();
+        PlayerDataModel targetPlayerData = DataBase.getEvenIfOffline(targetPlayer);
 
+        //Create Gui
+        Inventory inv = Bukkit.createInventory(null, Math.clamp(Bukkit.getOnlinePlayers().size(), 26, 80) + 1, Translations.getString(executorDataLanguage, "stats_for_player"));
+        executor.openInventory(inv);
     }
 
     private static void sendSuccess(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String message) {
