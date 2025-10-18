@@ -145,6 +145,7 @@ public class EventListeners implements Listener {
     @EventHandler
     public void onInventoryTake(InventoryClickEvent clickEvent) {
         HeartbreakerPVPCommand.cancelMove(clickEvent);
+        StatsGui.cancelMove(clickEvent);
     }
 
     @EventHandler

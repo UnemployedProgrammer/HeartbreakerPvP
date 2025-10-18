@@ -17,6 +17,7 @@ public class Translations {
 
     public static void registerLanguage(Language language) {
         translations.putIfAbsent(language.getCode(), language);
+        language.init();
     }
 
     public static String getString(Language lang, String key) {
@@ -33,7 +34,7 @@ public class Translations {
 
     public static String getString(Language lang, String key, Object... args) {
         String raw = lang.getString(key);
-        if (raw == null) return key; // Fallback, falls Schlüssel fehlt
+        if (raw == null) return key;
 
         StringBuilder result = new StringBuilder();
         int argIndex = 0;
