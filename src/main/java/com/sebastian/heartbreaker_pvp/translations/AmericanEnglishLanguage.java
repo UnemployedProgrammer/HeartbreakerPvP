@@ -69,4 +69,11 @@ public class AmericanEnglishLanguage extends Language {
 
         return translations;
     }
+
+    //TODO: Add to all languages
+    //  - "seconds_short" -> "s"
+    //  - "minutes_short" -> "m"
+    //  - "hours_short" -> "h"
+    //  - "fight" -> "Fight"
+    //  - "no_hearts_left_kick" -> "<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>"
 }

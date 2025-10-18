@@ -9,6 +9,8 @@ import com.sebastian.heartbreaker_pvp.fight.FightManager;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.time_limit.Settings;
 import com.sebastian.heartbreaker_pvp.time_limit.TimeLimitManager;
+import com.sebastian.heartbreaker_pvp.translations.Language;
+import com.sebastian.heartbreaker_pvp.translations.Translations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -61,14 +63,11 @@ public class EventListeners implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         DataBase.savePlayerData(event.getPlayer(), DataFileComunicator.readPlayerFile(event.getPlayer()));
         PlayerDataModel dataModel = DataBase.getPlayerData(event.getPlayer());
+        Language language = dataModel.getLanguage();
         PacketSender.getInstance().sendHeartsDecreasedPacket(event.getPlayer(), dataModel.getHearts());
         if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
             if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
-                if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
-                    event.getPlayer().kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
-                } else {
-                    event.getPlayer().kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>"));
-                }
+                event.getPlayer().kick(Translations.getComponent(language, "no_hearts_left_kick"));
             } else {
                 event.getPlayer().setGameMode(GameMode.SPECTATOR);
             }
@@ -90,24 +89,21 @@ public class EventListeners implements Listener {
         while(var2.hasNext()) {
             Player onlinePlayer = (Player)var2.next();
             PlayerDataModel dataModel = DataBase.getPlayerData(onlinePlayer);
+            Language language = dataModel.getLanguage();
 
             if(!PacketSender.playersWithMod.contains(onlinePlayer)) {
 
-                String timeString = formatSecondsToTime(dataModel.getTimeLimit());
+                String timeString = formatSecondsToTime(dataModel.getTimeLimit(), language);
                 Component actionBarMessage = ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>"));
                 if(dataModel.isInAFight()) {
-                    actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> Kampf: " + dataModel.getStillInAFightFor() + "s </red>"));
+                    actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> " + Translations.getString(language, "fight") + ": " + dataModel.getStillInAFightFor() + Translations.getString(language, "seconds_short") + " </red>"));
                 }
                 onlinePlayer.sendActionBar(actionBarMessage);
             }
 
             if (dataModel.getHearts() <= 0 && ConfigReader.Configuration.configuration != null) {
                 if (ConfigReader.Configuration.configuration.getZero_hearts_handling().equals("kick")) {
-                    if (ConfigReader.Configuration.configuration.getKick_msg().isEmpty()) {
-                        onlinePlayer.kick(MiniMessage.miniMessage().deserialize(ConfigReader.Configuration.configuration.getKick_msg()));
-                    } else {
-                        onlinePlayer.kick(MiniMessage.miniMessage().deserialize("<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>"));
-                    }
+                    onlinePlayer.kick(Translations.getComponent(language, "no_hearts_left_kick"));
                 } else {
                     onlinePlayer.setGameMode(GameMode.SPECTATOR);
                 }
@@ -118,11 +114,17 @@ public class EventListeners implements Listener {
     /**
      * Converts seconds to a human-readable time format (e.g., "10h 10m 9s")
      * @param totalSeconds The total number of seconds to convert
+     * @param language Language used for thr endings
      * @return Formatted string in h m s format (omits zero-value units)
      */
-    public static String formatSecondsToTime(long totalSeconds) {
+    public static String formatSecondsToTime(long totalSeconds, Language language) {
+        String h = Translations.getString(language, "hours_short");
+        String m = Translations.getString(language, "minutes_short");
+        String s = Translations.getString(language, "seconds_short");
+
+
         if (totalSeconds < 0) {
-            return "0s"; // or throw an exception if you prefer
+            return "0" + s; // or throw an exception if you prefer
         }
 
         long hours = totalSeconds / 3600;
@@ -132,12 +134,12 @@ public class EventListeners implements Listener {
         StringBuilder builder = new StringBuilder();
 
         if (hours > 0) {
-            builder.append(hours).append("h ");
+            builder.append(hours).append(h).append(" ");
         }
         if (minutes > 0 || hours > 0) { // Show minutes if there are hours, even if 0
-            builder.append(minutes).append("m ");
+            builder.append(minutes).append(m).append(" ");
         }
-        builder.append(seconds).append("s");
+        builder.append(seconds).append(s);
 
         return builder.toString().trim(); // trim in case of trailing space
     }
