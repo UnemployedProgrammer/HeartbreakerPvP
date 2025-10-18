@@ -20,6 +20,14 @@ public class Translations {
         language.init();
     }
 
+    public static ConcurrentHashMap<String, Language> getLanguages() {
+        return translations;
+    }
+
+    public static int getLanguageCount() {
+        return translations.size();
+    }
+
     public static String getString(Language lang, String key) {
         return lang.getString(key);
     }
@@ -57,6 +65,7 @@ public class Translations {
     }
 
     public static Language getLanguageFromCode(String code) {
+        if(code == null) return FALLBACK;
         return translations.getOrDefault(code, FALLBACK);
     }
 }

@@ -4,8 +4,7 @@ import com.sebastian.heartbreaker_pvp.command.*;
 import com.sebastian.heartbreaker_pvp.database.DataFileComunicator;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.time_limit.Settings;
-import com.sebastian.heartbreaker_pvp.translations.AmericanEnglishLanguage;
-import com.sebastian.heartbreaker_pvp.translations.Translations;
+import com.sebastian.heartbreaker_pvp.translations.*;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -51,6 +50,9 @@ public final class HeartbreakerPvP extends JavaPlugin {
 
         //Languages
         Translations.registerLanguage(new AmericanEnglishLanguage());
+        Translations.registerLanguage(new GermanyGermanLanguage());
+        Translations.registerLanguage(new GermanyColognianLanguage());
+        Translations.registerLanguage(new RussiaRussianLanguage());
     }
 
     @Override

@@ -5,11 +5,10 @@ import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.translations.Language;
 import com.sebastian.heartbreaker_pvp.translations.Translations;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -88,6 +87,12 @@ public class StatsGui implements InventoryHolder {
         Inventory invTmp = clickEvent.getInventory();
         if(invTmp.getHolder() != null && invTmp.getHolder() instanceof StatsGui inventory) {
             clickEvent.setCancelled(true);
+            if(clickEvent.getSlot() == 22) {
+                inventory.getInventoryView().close();
+                Sound advSound = Sound.sound(Key.key("minecraft", "entity.item_frame.remove_item"),
+                        Sound.Source.MASTER, 1.0f, 1.0f);
+                inventory.player.playSound(advSound);
+            }
         }
     }
 

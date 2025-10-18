@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldSaveEvent;
@@ -72,7 +73,6 @@ public class EventListeners implements Listener {
                 event.getPlayer().setGameMode(GameMode.SPECTATOR);
             }
         }
-
     }
 
     @EventHandler
@@ -146,7 +146,14 @@ public class EventListeners implements Listener {
     public void onInventoryTake(InventoryClickEvent clickEvent) {
         HeartbreakerPVPCommand.cancelMove(clickEvent);
         StatsGui.cancelMove(clickEvent);
+        LanguageChooseGui.cancelMove(clickEvent);
     }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent closeEvent) {
+        LanguageChooseGui.cancelEsc(closeEvent);
+    }
+
 
     @EventHandler
     public void onWorldSave(WorldSaveEvent worldSaveEvent) {
