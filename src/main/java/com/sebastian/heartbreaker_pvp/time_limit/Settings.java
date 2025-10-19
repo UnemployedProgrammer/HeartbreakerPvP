@@ -41,7 +41,7 @@ public class Settings {
         try {
             // Set current values
             config.set("global-time-limit", TimeLimitManager.GLOBAL_TIME_LIMIT);
-            config.set("default-player-time", TimeLimitManager.GLOBAL_TIME_LIMIT_ENABLED);
+            config.set("global-time-limit-enabled", TimeLimitManager.GLOBAL_TIME_LIMIT_ENABLED);
 
             // Save to file
             config.save(configFile);

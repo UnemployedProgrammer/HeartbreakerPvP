@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Objects;
 
 
 public class PlayerDataModel {
@@ -37,6 +38,10 @@ public class PlayerDataModel {
 
     public void setLanguage(Language language) {
         this.language = language.getCode();
+    }
+
+    public boolean hasLanguageSet() {
+        return !Objects.equals(language, "not_set");
     }
 
     public Language getLanguage() {

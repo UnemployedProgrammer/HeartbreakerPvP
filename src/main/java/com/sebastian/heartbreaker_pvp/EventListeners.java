@@ -71,6 +71,10 @@ public class EventListeners implements Listener {
             } else {
                 event.getPlayer().setGameMode(GameMode.SPECTATOR);
             }
+        } else if(!dataModel.hasLanguageSet()) {
+            Bukkit.getScheduler().runTaskLater(HeartbreakerPvP.instance, () -> {
+                LanguageChooseGui.create(event.getPlayer()).open();
+            }, 20);
         }
     }
 

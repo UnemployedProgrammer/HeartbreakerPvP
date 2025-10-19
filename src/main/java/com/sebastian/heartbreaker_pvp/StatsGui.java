@@ -5,6 +5,8 @@ import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.translations.Language;
 import com.sebastian.heartbreaker_pvp.translations.Translations;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -17,9 +19,11 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 public class StatsGui implements InventoryHolder {
@@ -101,6 +105,7 @@ public class StatsGui implements InventoryHolder {
         SkullMeta skull = (SkullMeta)item.getItemMeta();
         skull.displayName(Component.text(player.getName() != null ? player.getName() : "???"));
         skull.setOwningPlayer(player);
+        skull.lore(List.of());
         skull.getPersistentDataContainer().set(PREFER_MOD_STATS_KEY, PersistentDataType.BOOLEAN, true);
         item.setItemMeta(skull);
         return item;
@@ -109,7 +114,7 @@ public class StatsGui implements InventoryHolder {
     private static ItemStack getCloseButton(Language language) {
         ItemStack item = ItemStack.of(Material.ARROW);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.displayName(Component.text(Translations.getString(language, "close")));
+        itemMeta.displayName(Translations.getComponent(language, "close"));
         itemMeta.lore(List.of());
         item.setItemMeta(itemMeta);
         return item;
@@ -118,9 +123,12 @@ public class StatsGui implements InventoryHolder {
     private static ItemStack getStatItem(Language language, String id, int iconId, int value, OfflinePlayer player) {
         ItemStack item = ItemStack.of(Material.BARRIER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setCustomModelData(iconId);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData()
+                .addString(String.valueOf(iconId))
+                .build()
+        );
         itemMeta.displayName(Translations.getComponent(language, id));
-        itemMeta.lore(List.of(Translations.getComponent(language, id + ".desc", player.getName() != null ? player.getName() : "???", value)));
+        itemMeta.lore(Translations.getComponents(language, id + ".desc", player.getName() != null ? player.getName() : "???", value));
         item.setItemMeta(itemMeta);
         return item;
     }
@@ -128,9 +136,12 @@ public class StatsGui implements InventoryHolder {
     private static ItemStack getStatItemTwoValues(Language language, String id, int iconId, int value, int value2, OfflinePlayer player) {
         ItemStack item = ItemStack.of(Material.BARRIER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setCustomModelData(iconId);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData()
+                .addString(String.valueOf(iconId))
+                .build()
+        );
         itemMeta.displayName(Translations.getComponent(language, id));
-        itemMeta.lore(List.of(Translations.getComponent(language, id + ".desc", player.getName() != null ? player.getName() : "???", value, value2)));
+        itemMeta.lore(Translations.getComponents(language, id + ".desc", player.getName() != null ? player.getName() : "???", value, value2));
         item.setItemMeta(itemMeta);
         return item;
     }
@@ -138,9 +149,12 @@ public class StatsGui implements InventoryHolder {
     private static ItemStack getStatItemThreeValues(Language language, String id, int iconId, int value, int value2, int value3, OfflinePlayer player) {
         ItemStack item = ItemStack.of(Material.BARRIER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setCustomModelData(iconId);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData()
+                .addString(String.valueOf(iconId))
+                .build()
+        );
         itemMeta.displayName(Translations.getComponent(language, id));
-        itemMeta.lore(List.of(Translations.getComponent(language, id + ".desc", player.getName() != null ? player.getName() : "???", value, value2, value3)));
+        itemMeta.lore(Translations.getComponents(language, id + ".desc", player.getName() != null ? player.getName() : "???", value, value2, value3));
         item.setItemMeta(itemMeta);
         return item;
     }
@@ -148,6 +162,19 @@ public class StatsGui implements InventoryHolder {
     public static class Utils {
         public static String translateTitle(String val) {
             return "<yellow><b>" + val +"</b></yellow>";
+        }
+
+        public static ItemStack getStatImageDebugItem(int iconId) {
+            ItemStack item = ItemStack.of(Material.BARRIER);
+            item.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData()
+                    .addString(String.valueOf(iconId))
+                    .build()
+            );
+            ItemMeta itemMeta = item.getItemMeta();
+            itemMeta.displayName(Component.text("ABC"));
+            itemMeta.lore(List.of(Component.text("ABCDEFGHIJKLMNOPQRSTUVWXYZ")));
+            item.setItemMeta(itemMeta);
+            return item;
         }
     }
 }

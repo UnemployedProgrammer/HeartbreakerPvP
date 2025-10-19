@@ -17,6 +17,9 @@ public abstract class Language {
     protected abstract HashMap<String, String> getTranslations();
 
     public String getString(String translationCode) {
+        if(TRANSLATIONS == null) {
+            TRANSLATIONS = getTranslations();
+        }
         return TRANSLATIONS.getOrDefault(translationCode, translationCode);
     }
 }

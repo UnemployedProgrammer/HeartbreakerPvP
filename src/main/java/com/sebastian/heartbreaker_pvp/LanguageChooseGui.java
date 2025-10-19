@@ -5,6 +5,8 @@ import com.sebastian.heartbreaker_pvp.database.PlayerDataModel;
 import com.sebastian.heartbreaker_pvp.mod_compat.PacketSender;
 import com.sebastian.heartbreaker_pvp.translations.Language;
 import com.sebastian.heartbreaker_pvp.translations.Translations;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -96,7 +98,10 @@ public class LanguageChooseGui implements InventoryHolder {
     private static ItemStack getItemForLanguage(Language language) {
         ItemStack item = ItemStack.of(Material.BARRIER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setCustomModelData(100);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData()
+                .addString(String.valueOf(100))
+                .build()
+        );
         itemMeta.displayName(Component.text(language.getName()));
         itemMeta.lore(List.of(Component.text("Click to select language.")));
         itemMeta.getPersistentDataContainer().set(LANGUAGE_KEY, PersistentDataType.STRING, language.getCode());

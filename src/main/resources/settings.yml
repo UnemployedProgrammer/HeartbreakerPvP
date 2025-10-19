@@ -1,0 +1,13 @@
+# -------------------------------------------------------------------------------- #
+# Heartbreaker PvP - Konfiguration
+# -------------------------------------------------------------------------------- #
+
+# Globale Zeitbegrenzung für Kämpfe oder das PvP-System.
+# Der Wert wird in Sekunden angegeben. (Standard: 300 Sekunden = 5 Minuten)
+global-time-limit: 300
+
+# Aktiviert oder deaktiviert die globale Zeitbegrenzung.
+# Wenn 'false', wird das System die Zeitbegrenzung ignorieren.
+global-time-limit-enabled: true
+
+default-player-time: true

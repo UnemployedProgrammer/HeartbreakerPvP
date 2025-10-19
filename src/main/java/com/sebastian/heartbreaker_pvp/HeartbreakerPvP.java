@@ -46,6 +46,7 @@ public final class HeartbreakerPvP extends JavaPlugin {
         HeroTimeCommand.register(this);
         HeroFightCommand.register(this);
         StatsCommand.register(this);
+        LangaugeCommand.register(this);
         instance = this;
 
         //Languages

@@ -3,12 +3,11 @@ package com.sebastian.heartbreaker_pvp.translations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.C;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Translations {
     public static final Language FALLBACK = new AmericanEnglishLanguage();
@@ -30,6 +29,20 @@ public class Translations {
 
     public static String getString(Language lang, String key) {
         return lang.getString(key);
+    }
+
+    public static List<Component> getComponents(Language lang, String key) {
+        String[] lines = getString(lang, key).split("\n");
+        return Arrays.stream(lines)
+                .map(str -> MM.deserialize(str))
+                .toList();
+    }
+
+    public static List<Component> getComponents(Language lang, String key, Object... args) {
+        String[] lines = getString(lang, key, args).split("\n");
+        return Arrays.stream(lines)
+                .map(str -> MM.deserialize(str))
+                .toList();
     }
 
     public static Component getComponent(Language lang, String key) {

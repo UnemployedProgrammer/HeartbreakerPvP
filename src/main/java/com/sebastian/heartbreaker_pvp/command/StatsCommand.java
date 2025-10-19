@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class StatsCommand {
-    private static LiteralArgumentBuilder<CommandSourceStack> heroStatsCommand = Commands.literal("hero_stats")
+    private static LiteralArgumentBuilder<CommandSourceStack> heroStatsCommand = Commands.literal("stats")
             .then(
                     Commands.argument("player", StringArgumentType.word())
                             .suggests((CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) -> {
