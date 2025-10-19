@@ -67,6 +67,13 @@ public class GermanyGermanLanguage extends Language {
                 <white><green>»</green> %s <gray>Blöcke</gray></white>
                 """);
 
+        //HUD
+        translations.put("seconds_short", "s");
+        translations.put("minutes_short", "m");
+        translations.put("hours_short", "std");
+        translations.put("fight", "Kampf");
+        translations.put("no_hearts_left_kick", "<color:#36abff><gray>❤❤❤</gray> Du <u>wurdest gekickt</u>, da du <u><b>0</b> Herzen erreicht</u> hast! <gray>❤❤❤</gray></color>");
+
         return translations;
     }
 }

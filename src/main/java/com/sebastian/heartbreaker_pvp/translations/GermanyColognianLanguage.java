@@ -67,6 +67,13 @@ public class GermanyColognianLanguage extends Language {
                 <white><green>»</green> %s <gray>Blöck</gray></white>
                 """);
 
+        //HUD
+        translations.put("seconds_short", "s");
+        translations.put("minutes_short", "m");
+        translations.put("hours_short", "std");
+        translations.put("fight", "Kamf");
+        translations.put("no_hearts_left_kick", "<color:#36abff><gray>❤❤❤</gray> Do <u>woodts gekickt</u>, do do <u><b>0</b> Hätze erreich</u> häs! <gray>❤❤❤</gray></color>");
+
         return translations;
     }
 }

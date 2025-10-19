@@ -67,6 +67,13 @@ public class RussiaRussianLanguage extends Language {
                 <white><green>»</green> %s <gray>Блоков</gray></white>
                 """); // Hinweis: Die Position des Platzhalters wurde im Russischen leicht angepasst.
 
+        //HUD
+        translations.put("seconds_short", "с");
+        translations.put("minutes_short", "м");
+        translations.put("hours_short", "ч");
+        translations.put("fight", "Бой");
+        translations.put("no_hearts_left_kick", "<color:#36abff><gray>❤❤❤</gray> Тебя <u>выкинуло</u> за то, что у тебя <u><b>0</b> сердец</u>! <gray>❤❤❤</gray></color>");
+
         return translations;
     }
 }

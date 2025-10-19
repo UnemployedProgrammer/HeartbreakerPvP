@@ -67,6 +67,13 @@ public class AmericanEnglishLanguage extends Language {
                 <white><green>»</green> %s <gray>Blocks</gray></white>
                 """);
 
+        //HUD
+        translations.put("seconds_short", "s");
+        translations.put("minutes_short", "m");
+        translations.put("hours_short", "h");
+        translations.put("fight", "Fight");
+        translations.put("no_hearts_left_kick", "<color:#36abff><gray>❤❤❤</gray> You've <u>got kicked</u> because of <u>reaching <b>0</b> hearts</u>! <gray>❤❤❤</gray></color>");
+
         return translations;
     }
 
