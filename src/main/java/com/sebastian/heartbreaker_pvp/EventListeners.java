@@ -84,18 +84,16 @@ public class EventListeners implements Listener {
     public void onServerTickEnd(ServerTickEndEvent event) {
         TimeLimitManager.serverTick();
         FightManager.serverTick();
-        Iterator var2 = Bukkit.getOnlinePlayers().iterator();
 
-        while(var2.hasNext()) {
-            Player onlinePlayer = (Player)var2.next();
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             PlayerDataModel dataModel = DataBase.getPlayerData(onlinePlayer);
             Language language = dataModel.getLanguage();
 
-            if(!PacketSender.playersWithMod.contains(onlinePlayer)) {
+            if (!PacketSender.playersWithMod.contains(onlinePlayer)) {
 
                 String timeString = formatSecondsToTime(dataModel.getTimeLimit(), language);
                 Component actionBarMessage = ActionBarMessageParser.getParsedActionBarMessage(dataModel.getHearts()).append(MiniMessage.miniMessage().deserialize(" <green>|</green> <dark_green>" + timeString + "</dark_green>"));
-                if(dataModel.isInAFight()) {
+                if (dataModel.isInAFight()) {
                     actionBarMessage = actionBarMessage.append(MiniMessage.miniMessage().deserialize(" <green>|</green> <red> " + Translations.getString(language, "fight") + ": " + dataModel.getStillInAFightFor() + Translations.getString(language, "seconds_short") + " </red>"));
                 }
                 onlinePlayer.sendActionBar(actionBarMessage);
