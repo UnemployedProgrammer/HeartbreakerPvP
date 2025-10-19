@@ -1,0 +1,68 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "cases": [
+      {
+        "when": "1",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/current_health"
+        }
+      },
+      {
+        "when": "2",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/hero_hearts"
+        }
+      },
+      {
+        "when": "3",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/experience"
+        }
+      },
+      {
+        "when": "4",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/kills"
+        }
+      },
+      {
+        "when": "5",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/deaths"
+        }
+      },
+      {
+        "when": "6",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/blocks_placed"
+        }
+      },
+      {
+        "when": "7",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/blocks_destroyed"
+        }
+      },
+      {
+        "when": "100",
+        "model": {
+          "type": "minecraft:model",
+          "model": "heroes_res:item/language"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/barrier"
+    }
+  }
+}
